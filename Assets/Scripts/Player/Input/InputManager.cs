@@ -23,7 +23,7 @@ namespace JLexStudios
 
         [Header("Status")]
         public bool JMP;
-        bool SPRINT;
+        public bool SPRINT;
 
         [Header("Input Flags")]
         public bool jumpFlag;
@@ -55,6 +55,11 @@ namespace JLexStudios
             }
         }
 
+        void SprintInput()
+        {
+
+        }
+
         public void TickInput()
         {
             MovementInput();
@@ -74,10 +79,6 @@ namespace JLexStudios
 
         private void OnDisable()
         {
-            if(controls != null ) 
-            {
-
-            }
             controls.Disable();
         }
 
