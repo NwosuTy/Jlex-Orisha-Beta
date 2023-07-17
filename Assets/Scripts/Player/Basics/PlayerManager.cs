@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace JLexStudios
+namespace Creolty
 {
     public class PlayerManager : MonoBehaviour
     {
@@ -16,6 +16,7 @@ namespace JLexStudios
         [Header("Status")]
         public bool isInteracting;
         public bool isGrounded;
+        public bool isJumping;
         public bool canRotate;
 
 
@@ -34,11 +35,8 @@ namespace JLexStudios
         {
             float delta = Time.deltaTime;
             SetAnimatorBool();
-            inputManager.TickInput();
-            playerLocomotion.GroundedCheck();
-            playerLocomotion.GravityMethod(delta);
-            playerLocomotion.Movement(delta);
-            playerLocomotion.HandleRotation(delta);
+            inputManager.Updater();
+            playerLocomotion.Updater(delta);
         }
 
         private void LateUpdate()
@@ -50,6 +48,7 @@ namespace JLexStudios
         {
             isInteracting = animator.GetBool("isInteracting");
             canRotate = animator.GetBool("canRotate");
+            animator.SetBool("isJumping", isJumping);
         }
 
         void ResetInputs()

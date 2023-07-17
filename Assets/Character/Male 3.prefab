@@ -1885,10 +1885,10 @@ GameObject:
   - component: {fileID: 3729299353997117976}
   - component: {fileID: 7287121977862148194}
   - component: {fileID: 3768276477428183370}
-  - component: {fileID: 3132009271792598668}
-  - component: {fileID: 7755921999844407989}
-  - component: {fileID: 5203656179182180141}
-  - component: {fileID: 8230753135561099262}
+  - component: {fileID: 9164126928498115931}
+  - component: {fileID: 2890877632648942581}
+  - component: {fileID: 8948679326537975983}
+  - component: {fileID: 2938416532332663442}
   m_Layer: 8
   m_Name: Male 3
   m_TagString: Untagged
@@ -1912,11 +1912,11 @@ Transform:
   - {fileID: 5682907585269943317}
   - {fileID: 4933101287233755166}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &7287121977862148194
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1933,7 +1933,8 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!143 &3768276477428183370
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1942,17 +1943,25 @@ CharacterController:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4074335635113496738}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Height: 1.5
+  serializedVersion: 3
+  m_Height: 1.8
   m_Radius: 0.2
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &3132009271792598668
+--- !u!114 &9164126928498115931
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1969,11 +1978,10 @@ MonoBehaviour:
   playerLocomotion: {fileID: 0}
   animator: {fileID: 0}
   characterController: {fileID: 0}
-  cameraController: {fileID: 0}
   isInteracting: 0
   isGrounded: 0
   canRotate: 0
---- !u!114 &7755921999844407989
+--- !u!114 &2890877632648942581
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1982,7 +1990,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4074335635113496738}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c734f5b051c1a3c4ca9820f52f13a915, type: 3}
+  m_Script: {fileID: 11500000, guid: 3ec3117c3fcbf374f8b5b3670d3ac32b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   playerManager: {fileID: 0}
@@ -1995,9 +2003,10 @@ MonoBehaviour:
   cameraLookInput: {x: 0, y: 0}
   getPosInput: {x: 0, y: 0, z: 0}
   JMP: 0
+  SPRINT: 0
   jumpFlag: 0
   sprintFlag: 0
---- !u!114 &5203656179182180141
+--- !u!114 &8948679326537975983
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2026,10 +2035,10 @@ MonoBehaviour:
   jumpHeight: 1.2
   fallingTimeOutDelta: 0
   jumpingTimeOutDelta: 0
-  verticalVelocity: 0
+  verticalVelocity: {x: 0, y: 0, z: 0}
   terminalVelocity: 53
   moveDirection: {x: 0, y: 0, z: 0}
---- !u!114 &8230753135561099262
+--- !u!114 &2938416532332663442
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

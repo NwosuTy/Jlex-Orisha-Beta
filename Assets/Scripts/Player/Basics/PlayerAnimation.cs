@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
-namespace JLexStudios
+namespace Creolty
 {
     public class PlayerAnimation : MonoBehaviour
     {
@@ -21,47 +20,57 @@ namespace JLexStudios
             vertical = Animator.StringToHash("Vertical");
             horizontal = Animator.StringToHash("Horizontal");
         }
-        public void UpdateAnimatorValues(float VerticalMovement, float HorizontalMovement, float delta)
+        public void UpdateAnimatorValues
+            (float VerticalMovement, float HorizontalMovement, float delta, bool isSprinting)
         {
-            //Vertical
-            float v = 0f;
+            float snappedVeritcal = 0f;
+            float snappedHorizontal = 0f;
+
+            #region vertical
             if (VerticalMovement > 0.55f)
             {
-                v = 1f;
+                snappedVeritcal = 1f;
             }
             else if (VerticalMovement < -0.55f)
             {
-                v = -1f;
+                snappedVeritcal = -1f;
             }
             else
             {
-                v = 0f;
+                snappedVeritcal = 0f;
             }
-
-            //Horizontal
-            float h = 0f;
+            #endregion
+            #region horizontal
+            
             if (HorizontalMovement > 0f && HorizontalMovement < 0.55f)
             {
-                h = 0.55f;
+                snappedHorizontal = 0.55f;
             }
             else if (HorizontalMovement > 0.55f)
             {
-                h = 1f;
+                snappedHorizontal = 1f;
             }
             else if (HorizontalMovement < 0f && HorizontalMovement > -0.55f)
             {
-                h = -0.5f;
+                snappedHorizontal = -0.5f;
             }
             else if (HorizontalMovement < -0.55f)
             {
-                h = -1f;
+                snappedHorizontal = -1f;
             }
             else
             {
-                h = 0f;
+                snappedHorizontal = 0f;
             }
-            playerManager.animator.SetFloat(vertical, v, 0.1f, delta);
-            playerManager.animator.SetFloat(horizontal, h, 0.1f, delta);
+            #endregion
+
+            if(isSprinting)
+            {
+                snappedVeritcal = 2f;
+                snappedHorizontal = HorizontalMovement;
+            }
+            playerManager.animator.SetFloat(vertical, snappedVeritcal, 0.1f, delta);
+            playerManager.animator.SetFloat(horizontal, snappedHorizontal, 0.1f, delta);
         }
 
         public void SetTargetAnimation
@@ -69,16 +78,16 @@ namespace JLexStudios
         {
             playerManager.animator.applyRootMotion = isInteracting;
             playerManager.canRotate = canRotate;
-            playerManager.animator.SetBool("IsInteracting", isInteracting);
+            playerManager.animator.SetBool("isInteracting", isInteracting);
             playerManager.animator.CrossFade(TargetAnimation, transitionDuration);
         }
 
         protected virtual void OnAnimatorMove()
         {
-            /*if (playerManager.isInteracting == false)
+            if (playerManager.isInteracting == false)
             {
                 return;
-            }*/
+            }
             Vector3 velocity = playerManager.animator.deltaPosition;
             playerManager.characterController.Move(velocity);
             playerManager.transform.rotation *= playerManager.animator.deltaRotation;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace JLexStudios
+namespace Creolty
 {
     public class PlayerLocomotion : MonoBehaviour
     {
@@ -38,7 +38,7 @@ namespace JLexStudios
         public float jumpHeight = 1.2f;
         public float fallingTimeOutDelta;
         public float jumpingTimeOutDelta;
-        public float verticalVelocity;
+        public Vector3 verticalVelocity;
         public float terminalVelocity = 53.0f;
         public Vector3 moveDirection;
 
@@ -47,7 +47,6 @@ namespace JLexStudios
             playerManager = GetComponent<PlayerManager>();
         }
 
-        // Start is called before the first frame update
         void Start()
         {
             groundLayer = LayerMask.GetMask("Ground");
@@ -57,7 +56,7 @@ namespace JLexStudios
             }
         }
 
-        public void HandleRotation(float delta)
+        private void HandleRotation(float delta)
         {
             if (playerManager.canRotate)
             {
@@ -83,7 +82,7 @@ namespace JLexStudios
             }
         }
 
-        public void Movement(float delta)
+        private void Movement(float delta)
         {
             if (playerManager.isInteracting)
             {
@@ -114,30 +113,25 @@ namespace JLexStudios
                 }
             }
 
-            playerManager.playerAnimation.UpdateAnimatorValues
-                (playerManager.inputManager.totalMovementInputAmount, 0f, delta);
+            playerManager.playerAnimation.UpdateAnimatorValues(playerManager.inputManager.totalMovementInputAmount, 0f, delta,
+                playerManager.inputManager.sprintFlag);
         }
 
-        public void GroundedCheck()
+        private void GroundedCheck()
         {
             playerManager.isGrounded = Physics.CheckSphere(playerManager.transform.position,groundCheckSphereRadius,groundLayer);
             playerManager.animator.SetBool("isGrounded",playerManager.isGrounded);
         }
 
-        public void GravityMethod(float delta) //Jump, Falling and Grounded
+        private void GravityMethod(float delta) //Jump, Falling and Grounded
         {
             if (playerManager.isGrounded)
             {
                 fallingTimeOutDelta = FallTimeout;
-                // stop our velocity dropping infinitely when grounded
-                if (verticalVelocity < 0.0f)
-                {
-                    verticalVelocity = -2f;
-                }
 
-                if (playerManager.inputManager.jumpFlag == true && jumpingTimeOutDelta <= 0.0f)
+                if (verticalVelocity.y < 0.0f)
                 {
-                    HandleJumping();
+                    verticalVelocity.y = 0;
                 }
 
                 if (jumpingTimeOutDelta >= 0.0f)
@@ -163,28 +157,42 @@ namespace JLexStudios
                 }
             }
 
-            if (verticalVelocity < terminalVelocity)
+            if (verticalVelocity.y < terminalVelocity)
             {
-                verticalVelocity += gravity * delta;
+                verticalVelocity.y += gravity * delta;
             }
+            playerManager.characterController.Move(verticalVelocity * delta);
         }
 
         private void HandleJumping()
         {
-            if (playerManager.inputManager.totalMovementInputAmount > 0f)
+            if(playerManager.inputManager.jumpFlag)
             {
-                moveDirection = cameraObject.forward * playerManager.inputManager.Vertical;
-                moveDirection += cameraObject.right * playerManager.inputManager.Horizontal;
+                if (playerManager.inputManager.totalMovementInputAmount > 0f)
+                {
+                    moveDirection = cameraObject.forward * playerManager.inputManager.Vertical;
+                    moveDirection += cameraObject.right * playerManager.inputManager.Horizontal;
 
-                playerManager.playerAnimation.SetTargetAnimation("Jump", true, 0.5f);
-                moveDirection.y = 0;
-                Quaternion UnJumpRotation = Quaternion.LookRotation(moveDirection);
-                playerManager.transform.rotation = UnJumpRotation;
+                    playerManager.playerAnimation.SetTargetAnimation("Jump Start", true, 0.5f);
+                    moveDirection.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                    Quaternion OnJumpRotation = Quaternion.LookRotation(moveDirection);
+                    playerManager.transform.rotation = OnJumpRotation;
+                }
+                else
+                {
+                    playerManager.playerAnimation.SetTargetAnimation("Jump Start", true, 0.5f);
+                }
+                playerManager.characterController.Move(Time.deltaTime * moveDirection);
             }
-            else
-            {
-                playerManager.playerAnimation.SetTargetAnimation("Jump", true, 0.5f);
-            }
+        }
+
+        public void Updater(float delta)
+        {
+            GroundedCheck();
+            GravityMethod(delta);
+            Movement(delta);
+            HandleJumping();
+            HandleRotation(delta);
         }
 
         public void OnDrawGizmosSelected()

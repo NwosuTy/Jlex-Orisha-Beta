@@ -4,12 +4,12 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace JLexStudios
+namespace Creolty
 {
     public class InputManager : MonoBehaviour
     {
-        public PlayerManager playerManager;
         public Controls controls;
+        public PlayerManager playerManager;
 
         [Header("Input Stats")]
         public float totalMovementInputAmount;
@@ -34,17 +34,9 @@ namespace JLexStudios
             playerManager = GetComponent<PlayerManager>();
         }
 
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
         void JumpInput()
         {
             controls.Locomotion.Jump.performed += c => JMP = true;
-            //Checks if JMP is true, if yes return jumpflag as true else return false
-            //JMP = true ? jumpFlag = true : jumpFlag = false;
             if(JMP)
             {
                 jumpFlag = true;
@@ -57,12 +49,20 @@ namespace JLexStudios
 
         void SprintInput()
         {
-
+            if(SPRINT && totalMovementInputAmount > 0.5f)
+            {
+                sprintFlag = true;
+            }
+            else
+            {
+                sprintFlag = false;
+            }
         }
 
-        public void TickInput()
+        public void Updater()
         {
             MovementInput();
+            SprintInput();
             JumpInput();
         }
 
@@ -73,6 +73,10 @@ namespace JLexStudios
                 controls = new Controls();
                 controls.Locomotion.Walk.performed += i => movementInput = i.ReadValue<Vector2>();
                 controls.Locomotion.Look.performed += i => cameraLookInput = i.ReadValue<Vector2>();
+
+
+                controls.Locomotion.Sprint.performed += i => SPRINT = true;
+                controls.Locomotion.Sprint.canceled += i => SPRINT = false;
             }
             controls.Enable();
         }
