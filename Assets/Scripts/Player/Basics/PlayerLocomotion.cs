@@ -35,6 +35,7 @@ namespace Creolty
         public float movementSpeed = 3f;
         public float rotationSpeed = 12f;
         public float sprintSpeed = 6f;
+        public float crawlSpeed = 1f;
         public float jumpHeight = 1.2f;
         public float fallingTimeOutDelta;
         public float jumpingTimeOutDelta;
@@ -186,6 +187,25 @@ namespace Creolty
             }
         }
 
+        private void HandleCrawling()
+        {
+            // Toggle between standing and crawling.
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                playerManager.isCrawling = !playerManager.isCrawling;
+
+                if (playerManager.isCrawling)
+                {
+                    // transition from standing to crawling.
+                    playerManager.playerAnimation.SetTargetAnimation("Crawling Idle", true, 0.5f);
+                }
+                else
+                {
+                    // transition from crawling to standing.
+                    playerManager.playerAnimation.SetTargetAnimation("Crawling Idle", true, 0.5f);
+                }
+            }
+        }
         public void Updater(float delta)
         {
             GroundedCheck();
@@ -193,6 +213,7 @@ namespace Creolty
             Movement(delta);
             HandleJumping();
             HandleRotation(delta);
+            //HandleCrawling();
         }
 
         public void OnDrawGizmosSelected()

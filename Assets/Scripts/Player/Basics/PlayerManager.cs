@@ -18,6 +18,7 @@ namespace Creolty
         public bool isGrounded;
         public bool isJumping;
         public bool canRotate;
+        public bool isCrawling;
 
 
         // Start is called before the first frame update
@@ -49,6 +50,7 @@ namespace Creolty
             isInteracting = animator.GetBool("isInteracting");
             canRotate = animator.GetBool("canRotate");
             animator.SetBool("isJumping", isJumping);
+            animator.SetBool("isCrawling", isCrawling);
         }
 
         void ResetInputs()
