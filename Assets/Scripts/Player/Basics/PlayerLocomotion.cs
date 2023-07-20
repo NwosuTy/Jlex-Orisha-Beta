@@ -189,21 +189,12 @@ namespace Creolty
 
         private void HandleCrawling()
         {
-            // Toggle between standing and crawling.
-            if (Input.GetKeyDown(KeyCode.C))
+            // Toggle between standing to crawling.
+            if (playerManager.inputManager.crawlFlag)
             {
-                playerManager.isCrawling = !playerManager.isCrawling;
+                playerManager.isCrawling = true;
 
-                if (playerManager.isCrawling)
-                {
-                    // transition from standing to crawling.
-                    playerManager.playerAnimation.SetTargetAnimation("Crawling Idle", true, 0.5f);
-                }
-                else
-                {
-                    // transition from crawling to standing.
-                    playerManager.playerAnimation.SetTargetAnimation("Crawling Idle", true, 0.5f);
-                }
+                if (playerManager.isCrawling) playerManager.playerAnimation.SetTargetAnimation("Crawling Forward", true, 0.5f);
             }
         }
         public void Updater(float delta)
@@ -213,7 +204,7 @@ namespace Creolty
             Movement(delta);
             HandleJumping();
             HandleRotation(delta);
-            //HandleCrawling();
+            HandleCrawling();
         }
 
         public void OnDrawGizmosSelected()

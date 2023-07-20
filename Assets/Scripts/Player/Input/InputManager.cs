@@ -24,10 +24,12 @@ namespace Creolty
         [Header("Status")]
         public bool JMP;
         public bool SPRINT;
+        public bool CRAWL;
 
         [Header("Input Flags")]
         public bool jumpFlag;
         public bool sprintFlag;
+        public bool crawlFlag;
 
         private void Awake()
         {
@@ -59,11 +61,25 @@ namespace Creolty
             }
         }
 
+        void CrawlingInput()
+        {
+            controls.Locomotion.CrouchCrawl.performed += c => CRAWL = true;
+            if (CRAWL)
+            {
+                crawlFlag = true;
+            }
+            else
+            {
+                crawlFlag = false;
+            }
+        }
+
         public void Updater()
         {
             MovementInput();
             SprintInput();
             JumpInput();
+            CrawlingInput();
         }
 
         private void OnEnable()
