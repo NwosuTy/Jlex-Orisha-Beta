@@ -15,13 +15,8 @@ namespace Creolty
         public PlayerManager playerManager;
 
         [Header("Physics")]
-        [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
-        public float FallTimeout = 0.15f;
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
-        public float gravity = -15f;
-        [Space(10)]
-        [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
-        public float JumpTimeout = 0.50f;
+        public float gravityForce = -20f;
         [Tooltip("Useful for rough ground")]
         public float groundOffset = -0.14f;
         [Tooltip("The radius of the grounded check. Should match the radius of the CharacterController")]
@@ -32,16 +27,33 @@ namespace Creolty
         public float groundCheckSphereRadius = 0.35f;
 
         [Header("Locomotion Stats")]
+        [Space(5)]
+        [Header("Basic Locomotion Stats")]
+        public Vector3 moveDirection;
         public float movementSpeed = 3f;
         public float rotationSpeed = 12f;
         public float sprintSpeed = 6f;
-        public float crawlSpeed = 1f;
-        public float jumpHeight = 1.2f;
-        public float fallingTimeOutDelta;
-        public float jumpingTimeOutDelta;
+
+        [Space(5)]
+        [Header("Jump Stats")]
         public Vector3 verticalVelocity;
-        public float terminalVelocity = 53.0f;
-        public Vector3 moveDirection;
+        public Vector3 jumpDirection;
+        public float jumpHeight = 4f;
+        public float jumpSpeed = 5f;
+        public float freeFallSpeed = 2f;
+
+        [Space(5)]
+        [Header("Crawl And Crouch")]
+        public Vector3 crouchOrCallDirection;
+        public float crouchSpeed = 3f;
+        public float crawlSpeed = 1.5f;
+
+        [Space(5)]
+        [Header("Gravity Stats")]
+        public float inAirTimer = 0f;
+        public float groundedVerticalVelocity = -20f; //applied when grounded
+        public float fallStartVerticalVelocity = -7f; //applied whwn in air
+        public bool fallingVelocitySet = false;
 
         private void Awake()
         {
@@ -59,6 +71,10 @@ namespace Creolty
 
         private void HandleRotation(float delta)
         {
+            if(playerManager.isJumping)
+            {
+                return;
+            }
             if (playerManager.canRotate)
             {
                 Vector3 TargetDir = Vector3.zero;
@@ -89,6 +105,11 @@ namespace Creolty
             {
                 return;
             }
+
+            if (playerManager.isJumping)
+            {
+                return;
+            }
             if (!playerManager.isGrounded)
             {
                 return;
@@ -102,6 +123,7 @@ namespace Creolty
             {
                 playerManager.characterController.Move(sprintSpeed * delta * moveDirection);
             }
+            
             else
             {
                 if (playerManager.inputManager.totalMovementInputAmount > 0.5f)
@@ -114,8 +136,8 @@ namespace Creolty
                 }
             }
 
-            playerManager.playerAnimation.UpdateAnimatorValues(playerManager.inputManager.totalMovementInputAmount, 0f, delta,
-                playerManager.inputManager.sprintFlag);
+            playerManager.playerAnimation.UpdateAnimatorValues
+                (playerManager.inputManager.totalMovementInputAmount, 0f, delta,playerManager.inputManager.sprintFlag);
         }
 
         private void GroundedCheck()
@@ -124,87 +146,124 @@ namespace Creolty
             playerManager.animator.SetBool("isGrounded",playerManager.isGrounded);
         }
 
-        private void GravityMethod(float delta) //Jump, Falling and Grounded
+        //Faling and Landing
+        private void GravityMethod(float delta)
         {
-            if (playerManager.isGrounded)
+            if(playerManager.isGrounded)
             {
-                fallingTimeOutDelta = FallTimeout;
-
-                if (verticalVelocity.y < 0.0f)
+                if(verticalVelocity.y < 0f)
                 {
-                    verticalVelocity.y = 0;
-                }
-
-                if (jumpingTimeOutDelta >= 0.0f)
-                {
-                    jumpingTimeOutDelta -= delta;
-                    if (jumpingTimeOutDelta < 0.0f)
-                    {
-                        jumpingTimeOutDelta = 0.0f;
-                    }
+                    inAirTimer = 0f;
+                    fallingVelocitySet = false;
+                    verticalVelocity.y = groundedVerticalVelocity;
                 }
             }
             else
             {
-                jumpingTimeOutDelta = JumpTimeout;
-
-                if (fallingTimeOutDelta >= 0f)
+                if(playerManager.isJumping != true && fallingVelocitySet != true)
                 {
-                    fallingTimeOutDelta -= delta;
+                    fallingVelocitySet = true;
+                    verticalVelocity.y = fallStartVerticalVelocity;
                 }
-                else
-                {
-                    playerManager.playerAnimation.SetTargetAnimation("Fall", true);
-                }
-            }
-
-            if (verticalVelocity.y < terminalVelocity)
-            {
-                verticalVelocity.y += gravity * delta;
+                inAirTimer += delta;
+                playerManager.animator.SetFloat("InAirTimer", inAirTimer);
+                verticalVelocity.y += gravityForce * delta;
             }
             playerManager.characterController.Move(verticalVelocity * delta);
         }
 
+        private void HandleFreeFallMovement(float delta)
+        {
+            if(!playerManager.isGrounded)
+            {
+                Vector3 freeFallDirection;
+
+                freeFallDirection = cameraObject.transform.forward * playerManager.inputManager.Vertical;
+                freeFallDirection += cameraObject.transform.right * playerManager.inputManager.Horizontal;
+                freeFallDirection.y = 0f;
+
+                playerManager.characterController.Move(freeFallDirection * freeFallSpeed * delta);
+            }
+        }
+
         private void HandleJumping()
         {
-            if(playerManager.inputManager.jumpFlag)
+            if(playerManager.isInteracting) 
             {
-                if (playerManager.inputManager.totalMovementInputAmount > 0f)
-                {
-                    moveDirection = cameraObject.forward * playerManager.inputManager.Vertical;
-                    moveDirection += cameraObject.right * playerManager.inputManager.Horizontal;
-
-                    playerManager.playerAnimation.SetTargetAnimation("Jump Start", true, 0.5f);
-                    moveDirection.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-                    Quaternion OnJumpRotation = Quaternion.LookRotation(moveDirection);
-                    playerManager.transform.rotation = OnJumpRotation;
-                }
-                else
-                {
-                    playerManager.playerAnimation.SetTargetAnimation("Jump Start", true, 0.5f);
-                }
-                playerManager.characterController.Move(Time.deltaTime * moveDirection);
+                return;
             }
+            if(playerManager.isJumping)
+            {
+                return;
+            }
+            if(!playerManager.isGrounded)
+            { 
+                return; 
+            }
+
+            if (playerManager.inputManager.jumpFlag)
+            {
+                playerManager.animator.SetBool("isJumping", true);
+                playerManager.playerAnimation.SetTargetAnimation("Main Jump", false);
+            }
+
+            jumpDirection = cameraObject.transform.forward * playerManager.inputManager.Vertical;
+            jumpDirection += cameraObject.transform.right * playerManager.inputManager.Horizontal;
+            jumpDirection.y = 0;
+
+            if(jumpDirection != Vector3.zero)
+            {
+                if (playerManager.inputManager.sprintFlag)
+                {
+                    jumpDirection *= 1f;
+                }
+                else if (playerManager.inputManager.totalMovementInputAmount > 0.5f)
+                {
+                    jumpDirection *= 0.5f;
+                }
+                else if (playerManager.inputManager.totalMovementInputAmount <= 0.5f)
+                {
+                    jumpDirection *= 0.25f;
+                }
+            }          
         }
 
-        private void HandleCrawling()
+        private void HandleJumpMovement(float delta)
         {
-            // Toggle between standing to crawling.
-            if (playerManager.inputManager.crawlFlag)
+            if(playerManager.isJumping)
             {
-                playerManager.isCrawling = true;
-
-                if (playerManager.isCrawling) playerManager.playerAnimation.SetTargetAnimation("Crawling Forward", true, 0.5f);
+                playerManager.characterController.Move(jumpDirection * jumpSpeed * delta);
             }
         }
+
+        private void HandleCrawlingAndCrouchingMovement(float delta)
+        {
+            crouchOrCallDirection = cameraObject.transform.forward * playerManager.inputManager.Vertical;
+            crouchOrCallDirection += cameraObject.transform.right * playerManager.inputManager.Horizontal;
+            crouchOrCallDirection.y = 0;
+
+            if(playerManager.isCrouching)
+            {
+                playerManager.characterController.Move(crouchOrCallDirection * crouchSpeed * delta);
+            }
+            else if(playerManager.isCrawling)
+            {
+                playerManager.characterController.Move(crouchOrCallDirection * crawlSpeed * delta);
+            }
+            playerManager.playerAnimation.UpdateAnimatorValues
+                    (playerManager.inputManager.totalMovementInputAmount, 1f, delta, false);
+        }
+
         public void Updater(float delta)
         {
             GroundedCheck();
             GravityMethod(delta);
             Movement(delta);
             HandleJumping();
+            HandleJumpMovement(delta);
+            HandleFreeFallMovement(delta);
             HandleRotation(delta);
-            HandleCrawling();
+            HandleCrawlingAndCrouchingMovement(delta);
         }
 
         public void OnDrawGizmosSelected()

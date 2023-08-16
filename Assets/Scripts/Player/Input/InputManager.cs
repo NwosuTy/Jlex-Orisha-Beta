@@ -25,11 +25,11 @@ namespace Creolty
         public bool JMP;
         public bool SPRINT;
         public bool CRAWL;
+        public bool hasCrawled = false;
 
         [Header("Input Flags")]
         public bool jumpFlag;
         public bool sprintFlag;
-        public bool crawlFlag;
 
         private void Awake()
         {
@@ -64,13 +64,32 @@ namespace Creolty
         void CrawlingInput()
         {
             controls.Locomotion.CrouchCrawl.performed += c => CRAWL = true;
-            if (CRAWL)
+            if(CRAWL)
             {
-                crawlFlag = true;
-            }
-            else
-            {
-                crawlFlag = false;
+                if(playerManager.isCrouching != true && playerManager.isCrawling != true)
+                {
+                    playerManager.isCrouching = true;
+                }
+                else if(playerManager.isCrouching == true)
+                {
+                    if(hasCrawled != true)
+                    {
+                        hasCrawled = true;
+                        playerManager.isCrouching = false;
+                        playerManager.isCrawling = true;
+                    }
+                    else
+                    {
+                        playerManager.isCrawling = false;
+                        playerManager.isCrouching = false;
+                        hasCrawled = false;
+                    } 
+                }
+                else if(playerManager.isCrawling == true)
+                {
+                    playerManager.isCrawling = false;
+                    playerManager.isCrouching = true;
+                }
             }
         }
 

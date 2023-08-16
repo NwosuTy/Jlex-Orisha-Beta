@@ -20,8 +20,8 @@ namespace Creolty
             vertical = Animator.StringToHash("Vertical");
             horizontal = Animator.StringToHash("Horizontal");
         }
-        public void UpdateAnimatorValues
-            (float VerticalMovement, float HorizontalMovement, float delta, bool isSprinting)
+
+        public void UpdateAnimatorValues(float VerticalMovement, float HorizontalMovement, float delta,bool isSprinting)
         {
             float snappedVeritcal = 0f;
             float snappedHorizontal = 0f;
@@ -40,8 +40,8 @@ namespace Creolty
                 snappedVeritcal = 0f;
             }
             #endregion
+
             #region horizontal
-            
             if (HorizontalMovement > 0f && HorizontalMovement < 0.55f)
             {
                 snappedHorizontal = 0.55f;
